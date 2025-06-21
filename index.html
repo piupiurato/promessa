@@ -15,23 +15,55 @@
   <ul id="mensagens"></ul>
 
   <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyCdHut6ZYaq4KxNn19yj5ajgWsHTbeBYUM",
-    authDomain: "prometido-7b431.firebaseapp.com",
-    projectId: "prometido-7b431",
-    storageBucket: "prometido-7b431.firebasestorage.app",
-    messagingSenderId: "238984745757",
-    appId: "1:238984745757:web:d4abbed631c214bb8087f4"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyCdHut6ZYaq4KxNn19yj5ajgWsHTbeBYUM",
+      authDomain: "prometido-7b431.firebaseapp.com",
+      projectId: "prometido-7b431",
+      storageBucket: "prometido-7b431.appspot.com",  // CORRIGIDO aqui (.app para .appspot.com)
+      messagingSenderId: "238984745757",
+      appId: "1:238984745757:web:d4abbed631c214bb8087f4"
+    };
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-</script>
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Guardar mensagem
+    document.getElementById("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const mensagemInput = document.getElementById("mensagem");
+      const texto = mensagemInput.value;
+
+      try {
+        await addDoc(collection(db, "mensagens"), {
+          texto: texto
+        });
+        alert("Mensagem guardada com sucesso!");
+        mensagemInput.value = "";
+        mostrarMensagens();
+      } catch (error) {
+        console.error("Erro ao guardar:", error);
+        alert("Ocorreu um erro ao guardar a mensagem.");
+      }
+    });
+
+    // Mostrar mensagens
+    async function mostrarMensagens() {
+      const lista = document.getElementById("mensagens");
+      lista.innerHTML = "";
+
+      const snapshot = await getDocs(collection(db, "mensagens"));
+      snapshot.forEach(doc => {
+        const li = document.createElement("li");
+        li.textContent = doc.data().texto;
+        lista.appendChild(li);
+      });
+    }
+
+    // Mostrar ao carregar
+    mostrarMensagens();
+  </script>
 </body>
 </html>
